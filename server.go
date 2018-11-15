@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gorilla/websocket"
 	"go-websocket-barrage/connection"
 	"net/http"
@@ -47,12 +48,10 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		if data, err = conn.ReadMessage(); err != nil {
-			conn.Close()
 			return
 		}
 
 		if err = conn.WriteMessage(data); err != nil {
-			conn.Close()
 			return
 		}
 	}
@@ -60,4 +59,10 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/ws", wsHandler)
 	http.ListenAndServe("localhost:7777", nil)
+	count := 0
+	for {
+		fmt.Println("count:", count)
+		count++
+		time.Sleep(time.Second)
+	}
 }
