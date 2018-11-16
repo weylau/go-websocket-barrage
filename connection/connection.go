@@ -1,7 +1,6 @@
 package connection
 
 import (
-	"errors"
 	"github.com/gorilla/websocket"
 	"sync"
 )
@@ -39,22 +38,12 @@ func InitConnection(wsConn *websocket.Conn) (conn *Connection, err error) {
 
 //API
 func (conn *Connection) ReadMessage() (data []byte, err error) {
-	select {
-	case data = <-conn.inMsg:
-	case <-conn.closeChan:
-		err = errors.New("connection is closed")
-	}
-
+	data = <-conn.inMsg
 	return
 }
 
 func (conn *Connection) WriteMessage(data []byte) (err error) {
-	select {
-	case conn.outMsg <- data:
-	case <-conn.closeChan:
-		err = errors.New("connection is closed")
-	}
-
+	conn.outMsg <- data
 	return
 }
 
@@ -97,7 +86,6 @@ func (conn *Connection) writeLoop(wg *sync.WaitGroup) {
 		case <-conn.closeChan:
 			return
 		}
-
 		if err = conn.wsConn.WriteMessage(websocket.TextMessage, data); err != nil {
 			return
 		}
